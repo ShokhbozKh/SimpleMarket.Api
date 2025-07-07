@@ -28,7 +28,7 @@ namespace SimpleMarket.Api.Repositories
 
             if (product == null)
             {
-                return null; 
+                return null;
             }
             return product;
         }
@@ -44,7 +44,7 @@ namespace SimpleMarket.Api.Repositories
             }
             await _context.Products.AddAsync(product);
             await _context.SaveChangesAsync();
-            
+
 
             return product;
         }
@@ -57,11 +57,11 @@ namespace SimpleMarket.Api.Repositories
             }
             _context.Products.Update(product);
             await _context.SaveChangesAsync();
-            
+
         }
         public async Task DeleteProductAsync(int id)
         {
-            var result = await _context.Products.FirstOrDefaultAsync(p=>p.Id==id);
+            var result = await _context.Products.FirstOrDefaultAsync(p => p.Id == id);
             if (result == null)
             {
                 throw new KeyNotFoundException($"Product with ID {id} not found.");
@@ -74,7 +74,9 @@ namespace SimpleMarket.Api.Repositories
         {
             return await _context.Products.AnyAsync(p => p.Id == id);
         }
-
-
+        public async Task<int> CountAsync()
+        {
+            return await _context.Products.CountAsync();
+        }
     }
 }
