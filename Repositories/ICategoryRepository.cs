@@ -10,7 +10,8 @@ namespace SimpleMarket.Api.Repositories
         Task UpdateCategoryAsync(Category category);
         Task DeleteCategoryAsync(Category category);
         Task<bool> Exists(int id);
-        
+        Task<int> CountAsync();
+
 
     }
 }

@@ -46,7 +46,16 @@ namespace SimpleMarket.Api.Controllers
             }
             return Ok(product); // Return the product
         }
-
+        [HttpGet("Count")]
+        public async Task<ActionResult<int>> GetCountProductsAsync()
+        {
+            var count = await _productService.CountProductsAsync();
+            if (count < 0)
+            {
+                return NotFound("No products found.");
+            }
+            return Ok(count); // Return the count of products
+        }
         // POST: api/products
         [HttpPost]
         public async Task<ActionResult<ReadProductDto>> Post([FromBody] CreateProductDto? product)

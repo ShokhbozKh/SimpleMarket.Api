@@ -103,5 +103,10 @@ namespace SimpleMarket.Api.Services
         {
             return await _categoryRepository.Exists(id);
         }
+        public async Task<int> CountCategoriesAsync()
+        {
+            var allCategories = await _categoryRepository.CountAsync();
+            return allCategories;
+        }
     }
 }

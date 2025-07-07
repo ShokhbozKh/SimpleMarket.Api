@@ -10,5 +10,7 @@ namespace SimpleMarket.Api.Services
         Task UpdateCategoryAsync(int id, UpdateCategoryDto categoryDto);
         Task DeleteCategoryAsync(int id);
         Task<bool> CategoryExistsAsync(int id);
+        Task<int> CountCategoriesAsync();
+
     }
 }

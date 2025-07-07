@@ -15,7 +15,7 @@ namespace SimpleMarket.Api.Services
         public async Task<IEnumerable<ReadProductDto>> GetAllProductsAsync()
         {
             var result = await _productRepository.GetAllProductsAsync();
-            
+
             if (result == null || !result.Any())
             {
                 return Enumerable.Empty<ReadProductDto>(); // Return an empty collection if no products found
@@ -27,8 +27,8 @@ namespace SimpleMarket.Api.Services
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
-                CategoryId=product.CategoryId
-                 
+                CategoryId = product.CategoryId
+
             }).ToList();
 
             return readProductDtos;
@@ -48,7 +48,7 @@ namespace SimpleMarket.Api.Services
                 Name = product.Name,
                 Description = product.Description,
                 Price = product.Price,
-                CategoryId = product.CategoryId 
+                CategoryId = product.CategoryId
             };
             return readProductDto;
         }
@@ -65,7 +65,7 @@ namespace SimpleMarket.Api.Services
                 Price = product.Price,
                 CategoryId = product.CategoryId
             };
-            
+
             var createdProduct = await _productRepository.CreateProductAsync(newProduct);
             if (createdProduct == null)
             {
@@ -78,12 +78,12 @@ namespace SimpleMarket.Api.Services
                 Description = createdProduct.Description,
                 Price = createdProduct.Price,
                 CategoryId = createdProduct.CategoryId
-              
+
             };
             return readProductDto;
         }
 
-        
+
         public async Task UpdateProductAsync(int id, UpdateProductDto? product)
         {
             var existingProduct = await _productRepository.GetProductByIdAsync(id);
@@ -97,19 +97,24 @@ namespace SimpleMarket.Api.Services
             existingProduct.CategoryId = product?.CategoryId ?? existingProduct.CategoryId;
 
             await _productRepository.UpdateProductAsync(existingProduct);
-            
+
         }
 
         public async Task DeleteProductAsync(int id)
         {
-            if( !await _productRepository.Exists(id))
+            if (!await _productRepository.Exists(id))
             {
                 return;
             }
             await _productRepository.DeleteProductAsync(id);
-            
-        }
 
-        
+        }
+        public async Task<int> CountProductsAsync()
+        {
+            var products = await _productRepository.CountAsync();
+            return products;
+
+
+        }
     }
 }

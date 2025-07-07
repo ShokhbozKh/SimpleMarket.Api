@@ -10,6 +10,7 @@ namespace SimpleMarket.Api.Services
         Task<ReadProductDto> CreateProductAsync(CreateProductDto? product);
         Task UpdateProductAsync(int id, UpdateProductDto? product);
         Task DeleteProductAsync(int id);
+        Task <int> CountProductsAsync();
 
 
     }

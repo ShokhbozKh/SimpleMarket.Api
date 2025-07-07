@@ -24,7 +24,17 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();// bu -> s
 // Register the service interface and implementation for categories
 builder.Services.AddScoped<ICategoryService, CategoryService>(); // bu -> controller da ishlatish uchun kerak
 
+
 var app = builder.Build();
+
+// Register the fake data seeder
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<MarketDbContext>();
+
+    FakeDataSeeder.SeedCategoryData(context, 50); // Baza to‘ldiriladi
+    FakeDataSeeder.SeedProductData(context, 50); // Baza to‘ldiriladi
+}
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

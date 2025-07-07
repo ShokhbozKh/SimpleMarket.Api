@@ -11,5 +11,6 @@ namespace SimpleMarket.Api.Repositories
         Task UpdateProductAsync(Product? product);
         Task DeleteProductAsync(int id);
         Task <bool> Exists(int id);
+        Task<int> CountAsync();
     }
 }

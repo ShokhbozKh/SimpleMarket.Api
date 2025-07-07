@@ -42,6 +42,16 @@ namespace SimpleMarket.Api.Controllers
             }
             return Ok(result);
         }
+        [HttpGet("Count")]
+        public async Task<ActionResult<IEnumerable<ReadCategoryDto>>> GetCountCategories()
+        {
+            var result = await _categoryService.CountCategoriesAsync();
+            if (result < 0)
+            {
+                return NotFound("No categories found.");
+            }
+            return Ok(result);
+        }
 
         // POST api/categories
         [HttpPost]
