@@ -1,0 +1,16 @@
+﻿using SimpleMarket.Api.DTOs.Product;
+using SimpleMarket.Api.Models;
+
+namespace SimpleMarket.Api.Services
+{
+    public interface IProductService
+    {
+        Task <IEnumerable<ReadProductDto>> GetAllProductsAsync();
+        Task <ReadProductDto> GetProductByIdAsync(int id);
+        Task<ReadProductDto> CreateProductAsync(CreateProductDto? product);
+        Task UpdateProductAsync(int id, UpdateProductDto? product);
+        Task DeleteProductAsync(int id);
+
+
+    }
+}
