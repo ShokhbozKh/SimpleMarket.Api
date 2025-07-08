@@ -4,7 +4,7 @@ namespace SimpleMarket.Api.Repositories
 {
     public interface ICategoryRepository
     {
-        Task<IEnumerable<Category>> GetAllCategoriesAsync();
+        Task<IEnumerable<Category>> GetAllCategoriesAsync(string? name, string? desc, int? maxId, int? minId);
         Task<Category> GetByIdAsync(int id);
         Task<Category> CreateCategoryAsync(Category category);
         Task UpdateCategoryAsync(Category category);

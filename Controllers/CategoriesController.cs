@@ -21,9 +21,9 @@ namespace SimpleMarket.Api.Controllers
         }
         // GET: api/categories
         [HttpGet]
-        public async Task <ActionResult<IEnumerable<ReadCategoryDto>>> Get()
+        public async Task <ActionResult<IEnumerable<ReadCategoryDto>>> Get(string? searchName, string? description, int? maxId, int? minId)
         {
-            var result = await _categoryService.GetAllCategoriesAsync();
+            var result = await _categoryService.GetAllCategoriesAsync( searchName, description, maxId, minId);
             if(result == null || !result.Any())
             {
                 return NotFound("No categories found.");

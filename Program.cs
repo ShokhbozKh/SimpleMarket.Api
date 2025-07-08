@@ -1,5 +1,8 @@
 using Microsoft.EntityFrameworkCore;
+using Serilog;
+using Serilog.Events;
 using SimpleMarket.Api.Data;
+using SimpleMarket.Api.Middlewares;
 using SimpleMarket.Api.Repositories;
 using SimpleMarket.Api.Services;
 
@@ -24,8 +27,11 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();// bu -> s
 // Register the service interface and implementation for categories
 builder.Services.AddScoped<ICategoryService, CategoryService>(); // bu -> controller da ishlatish uchun kerak
 
-
+// Serilog konfiguratsiyasi
 var app = builder.Build();
+// Configure the HTTP request pipeline.
+//app.UseMiddleware<LoggingMiddleware>(); // Custom middleware for logging requests and responses
+//app.UseMiddleware<ExceptionMiddleware>(); // Custom middleware for handling exceptions
 
 // Register the fake data seeder
 using (var scope = app.Services.CreateScope())

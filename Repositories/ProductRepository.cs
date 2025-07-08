@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SimpleMarket.Api.Data;
+using SimpleMarket.Api.DTOs.Product;
 using SimpleMarket.Api.Models;
 
 namespace SimpleMarket.Api.Repositories
@@ -12,12 +13,45 @@ namespace SimpleMarket.Api.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
-        public async Task<IEnumerable<Product>> GetAllProductsAsync()
+        public async Task<IEnumerable<Product>> GetAllProductsAsync( ProductFilterDto filterDto)
         {
-            var products = await _context.Products
-                .Include(p => p.Category) // Include related Category data
-                .ToListAsync();
-            return products;
+            var query = _context.Products
+                .Include(Category => Category.Category) // Include related Category data
+                .AsQueryable();
+
+            if(!string.IsNullOrEmpty(filterDto.Name))
+            {
+                query = query.Where(p => p.Name.Contains(filterDto.Name));
+            }
+            if(!string.IsNullOrEmpty(filterDto.Description))
+            {
+                query = query.Where(p => p.Description.Contains(filterDto.Description));
+            }
+            if(filterDto.MaxPrice.HasValue)
+            {
+                query = query.Where(p => p.Price <= filterDto.MaxPrice.Value);
+            }
+            if(filterDto.MinPrice.HasValue)
+            {
+                query = query.Where(p => p.Price >= filterDto.MinPrice.Value);
+            }
+            if(filterDto.MaxId.HasValue)
+            {
+                query = query.Where(p => p.Id <= filterDto.MaxId.Value);
+            }
+            if(filterDto.MinId.HasValue)
+            {
+                query = query.Where(p => p.Id >= filterDto.MinId.Value);
+            }
+            if(filterDto.CategoryId.HasValue)
+            {
+
+
+                query = query.Where(p => p.CategoryId == filterDto.CategoryId);
+                            
+            }
+
+            return await query.ToListAsync() ;
         }
 
         public async Task<Product> GetProductByIdAsync(int id)
