@@ -12,9 +12,9 @@ namespace SimpleMarket.Api.Services
         {
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
-        public async Task<IEnumerable<ReadProductDto>> GetAllProductsAsync()
+        public async Task<IEnumerable<ReadProductDto>> GetAllProductsAsync(ProductFilterDto filterDto)
         {
-            var result = await _productRepository.GetAllProductsAsync();
+            var result = await _productRepository.GetAllProductsAsync(filterDto);
 
             if (result == null || !result.Any())
             {

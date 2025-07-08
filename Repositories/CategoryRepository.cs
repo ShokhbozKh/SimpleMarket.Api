@@ -15,10 +15,30 @@ namespace SimpleMarket.Api.Repositories
                 throw new ArgumentNullException(nameof(marketDbContext));
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(string? name, string? desc, int? maxId, int? minId)
         {
-            var result = await _context.Categories.ToListAsync();
-            return result;
+            var query = _context.Categories.AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(name))
+            {
+                query = query.Where(query => query.Name.Contains(name));
+            }
+            if (!string.IsNullOrWhiteSpace(desc))
+            {
+                query = query.Where(query => query.Description.Contains(desc));
+            }
+            // Filter by maxId and minId if provided
+            if(minId.HasValue) // true if minId is not null
+            {
+                query = query.Where(query => query.Id >= minId.Value);
+            }
+            if(maxId.HasValue) // true if maxId is not null
+            {
+                query = query.Where(query => query.Id <= maxId.Value);
+            }
+
+
+            return await query.ToListAsync();
         }
         public async Task<Category> GetByIdAsync(int id)
         {

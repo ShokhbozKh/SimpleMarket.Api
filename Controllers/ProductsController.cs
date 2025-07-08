@@ -21,9 +21,9 @@ namespace SimpleMarket.Api.Controllers
         }
         // GET: api/products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadProductDto>>> GetAllAsync()
+        public async Task<ActionResult<IEnumerable<ReadProductDto>>> GetAllAsync([FromQuery] ProductFilterDto filterDto)
         {
-            var products = await _productService.GetAllProductsAsync();
+            var products = await _productService.GetAllProductsAsync(filterDto);
             if (products == null || !products.Any())
             {
                 return NotFound("No products found.");

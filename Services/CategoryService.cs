@@ -11,9 +11,9 @@ namespace SimpleMarket.Api.Services
         {
             _categoryRepository = category ?? throw new ArgumentNullException(nameof(category));
         }
-        public async Task<IEnumerable<ReadCategoryDto>> GetAllCategoriesAsync()
+        public async Task<IEnumerable<ReadCategoryDto>> GetAllCategoriesAsync(string? name, string? desc, int? maxId, int? minId)
         {
-            var allCategories = await _categoryRepository.GetAllCategoriesAsync();
+            var allCategories = await _categoryRepository.GetAllCategoriesAsync(name, desc, maxId, minId);
 
             if (allCategories == null)
             {
