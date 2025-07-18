@@ -1,4 +1,6 @@
-﻿using SimpleMarket.Api.DTOs.Category;
+﻿using SimpleMarket.Api.DTOs;
+using SimpleMarket.Api.DTOs.Category;
+using SimpleMarket.Api.Exceptions;
 using SimpleMarket.Api.Models;
 using SimpleMarket.Api.Repositories;
 
@@ -9,24 +11,19 @@ namespace SimpleMarket.Api.Services
         private readonly ICategoryRepository _categoryRepository;
         public CategoryService(ICategoryRepository category )
         {
-            _categoryRepository = category ?? throw new ArgumentNullException(nameof(category));
+            _categoryRepository = category ?? throw new CustomException($" Server isnt working:{nameof(category).ToString()}", 500);
         }
-        public async Task<IEnumerable<ReadCategoryDto>> GetAllCategoriesAsync(string? name, string? desc, int? maxId, int? minId)
+        public async Task<PaginatedResult<ReadCategoryDto>> GetAllCategoriesAsync(CategoryFilterDto categoryFilterDto)
         {
-            var allCategories = await _categoryRepository.GetAllCategoriesAsync(name, desc, maxId, minId);
+            var allCategories = await _categoryRepository.GetAllCategoriesAsync(categoryFilterDto);
 
             if (allCategories == null)
             {
-                return null;
+                throw new CustomException("CAtegory is null", 404);
             }
-            var result = allCategories.Select(c=> new ReadCategoryDto
-            {
-                Id = c.Id,
-                Name = c.Name,
-                Description = c.Description
-            }).ToList();
+           
 
-            return result;
+            return allCategories;
         }
 
         public async Task<ReadCategoryDto> GetCategoryByIdAsync(int id)
@@ -34,7 +31,7 @@ namespace SimpleMarket.Api.Services
             var category = await _categoryRepository.GetByIdAsync(id);
             if (category == null)
             {
-                return null;
+                throw new CustomException($"Id:{id} aniqlanmadi", 404);
             }
             var result = new ReadCategoryDto
             {
@@ -49,7 +46,7 @@ namespace SimpleMarket.Api.Services
         {
             if (string.IsNullOrWhiteSpace(categoryDto.Name))
             {
-                throw new ArgumentException("Category name cannot be empty.", nameof(categoryDto.Name));
+                throw new CustomException($"Category name cannot be empty, { nameof(categoryDto.Name) }", 404);
             }
 
             var newCategory = new Category
@@ -69,18 +66,17 @@ namespace SimpleMarket.Api.Services
             return result;
 
         }
-
-       
+ 
         public async Task UpdateCategoryAsync(int id, UpdateCategoryDto categoryDto)
         {
             var result = await _categoryRepository.GetByIdAsync(id);
             if (result == null)
             {
-                throw new KeyNotFoundException($"Category with ID {id} not found.");
+                throw new CustomException($"Category with ID {id} not found.", 404);
             }
             if (categoryDto == null)
             {
-                throw new ArgumentNullException(nameof(categoryDto), "Update data cannot be null.");
+                throw new CustomException($"{nameof(categoryDto)}, Update data cannot be null.", 404);
             }
 
             var updatedCategory = new Category
@@ -95,7 +91,7 @@ namespace SimpleMarket.Api.Services
             var deleteCategory = await _categoryRepository.GetByIdAsync(id);
             if (deleteCategory == null)
             {
-                throw new KeyNotFoundException($"Category with ID {id} not found.");
+                throw new CustomException($"Category with ID {id} not found.", 404);
             }
             await _categoryRepository.DeleteCategoryAsync(deleteCategory);
         }

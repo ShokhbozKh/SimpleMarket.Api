@@ -1,10 +1,12 @@
-﻿using SimpleMarket.Api.DTOs.Category;
+﻿using SimpleMarket.Api.DTOs;
+using SimpleMarket.Api.DTOs.Category;
+using SimpleMarket.Api.Models;
 
 namespace SimpleMarket.Api.Services
 {
     public interface ICategoryService
     {
-        Task<IEnumerable<ReadCategoryDto>> GetAllCategoriesAsync(string? search, string? description, int? maxId, int? minId);
+        Task<PaginatedResult<ReadCategoryDto>> GetAllCategoriesAsync(CategoryFilterDto categoryFilterDto);
         Task<ReadCategoryDto> GetCategoryByIdAsync(int id);
         Task<ReadCategoryDto> CreateCategoryAsync(CreateCategoryDto categoryDto);
         Task UpdateCategoryAsync(int id, UpdateCategoryDto categoryDto);

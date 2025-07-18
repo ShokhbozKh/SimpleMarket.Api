@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SimpleMarket.Api.DTOs;
 using SimpleMarket.Api.DTOs.Product;
 using SimpleMarket.Api.Models;
 using SimpleMarket.Api.Repositories;
@@ -12,26 +13,18 @@ namespace SimpleMarket.Api.Services
         {
             _productRepository = productRepository ?? throw new ArgumentNullException(nameof(productRepository));
         }
-        public async Task<IEnumerable<ReadProductDto>> GetAllProductsAsync(ProductFilterDto filterDto)
+        public async Task<PaginatedResult<ReadProductDto>> GetAllProductsAsync(ProductFilterDto filterDto)
         {
             var result = await _productRepository.GetAllProductsAsync(filterDto);
 
-            if (result == null || !result.Any())
+            if (result == null)
             {
-                return Enumerable.Empty<ReadProductDto>(); // Return an empty collection if no products found
+                throw new ArgumentNullException("No products found.", nameof(result));
             }
 
-            var readProductDtos = result.Select(product => new ReadProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                Price = product.Price,
-                CategoryId = product.CategoryId
+            
 
-            }).ToList();
-
-            return readProductDtos;
+            return result;
         }
 
         public async Task<ReadProductDto> GetProductByIdAsync(int id)

@@ -8,12 +8,23 @@ using SimpleMarket.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// log yozish
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Debug()
+    .WriteTo.Console()
+    .WriteTo.File("logs/log-.txt", rollingInterval: RollingInterval.Day) // asosiy loglar
+    .WriteTo.File("logs/Error_log-.txt", rollingInterval: RollingInterval.Day, restrictedToMinimumLevel: LogEventLevel.Error) // faqat error loglar
+    .CreateLogger();
+
+builder.Host.UseSerilog();
+
 // Add services to the container.
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 // Register the DbContext with dependency injection
 builder.Services.AddDbContext<MarketDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -27,13 +38,16 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();// bu -> s
 // Register the service interface and implementation for categories
 builder.Services.AddScoped<ICategoryService, CategoryService>(); // bu -> controller da ishlatish uchun kerak
 
+// caches keshlash
+builder.Services.AddResponseCaching(); // 
+builder.Services.AddOutputCache(); // 
+//builder.Services.AddMemoryCache();// Di ->
+
 // Serilog konfiguratsiyasi
 var app = builder.Build();
 // Configure the HTTP request pipeline.
-//app.UseMiddleware<LoggingMiddleware>(); // Custom middleware for logging requests and responses
-//app.UseMiddleware<ExceptionMiddleware>(); // Custom middleware for handling exceptions
 
-// Register the fake data seeder
+// Fake data
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<MarketDbContext>();
@@ -41,17 +55,27 @@ using (var scope = app.Services.CreateScope())
     FakeDataSeeder.SeedCategoryData(context, 50); // Baza to‘ldiriladi
     FakeDataSeeder.SeedProductData(context, 50); // Baza to‘ldiriladi
 }
-
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+// 
+app.UseMiddleware<ExceptionHandlerMiddleware>();
+app.UseMiddleware<HelloMiddleware>();
+app.UseMiddleware<IpLoggingMiddleware>();
+
+app.UseMiddleware<RequestTimingMiddleware>();
 
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
+
+// keshlash
+app.UseResponseCaching();
+app.UseOutputCache();
+
 
 app.MapControllers();
 
