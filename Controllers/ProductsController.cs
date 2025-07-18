@@ -1,7 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.OutputCaching;
 using Microsoft.EntityFrameworkCore;
 using SimpleMarket.Api.Data;
+using SimpleMarket.Api.DTOs;
 using SimpleMarket.Api.DTOs.Product;
 using SimpleMarket.Api.Models;
 using SimpleMarket.Api.Services;
@@ -21,10 +23,11 @@ namespace SimpleMarket.Api.Controllers
         }
         // GET: api/products
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReadProductDto>>> GetAllAsync([FromQuery] ProductFilterDto filterDto)
+        [OutputCache(Duration = 10)] // 1 sekund
+        public async Task<ActionResult<PaginatedResult<ReadProductDto>>> GetAllAsync([FromQuery] ProductFilterDto filterDto)
         {
-            var products = await _productService.GetAllProductsAsync(filterDto);
-            if (products == null || !products.Any())
+            var products = await _productService.GetAllProductsAsync(filterDto); //hfj
+            if (products == null)
             {
                 return NotFound("No products found.");
             }

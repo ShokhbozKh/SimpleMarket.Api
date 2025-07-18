@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SimpleMarket.Api.Data;
+using SimpleMarket.Api.DTOs;
 using SimpleMarket.Api.DTOs.Product;
 using SimpleMarket.Api.Models;
 
@@ -12,12 +13,9 @@ namespace SimpleMarket.Api.Repositories
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
         }
-
-        public async Task<IEnumerable<Product>> GetAllProductsAsync( ProductFilterDto filterDto)
+        public async Task<PaginatedResult<ReadProductDto>> GetAllProductsAsync(ProductFilterDto filterDto)
         {
-            var query = _context.Products
-                .Include(Category => Category.Category) // Include related Category data
-                .AsQueryable();
+            var query = _context.Products.AsQueryable();
 
             if(!string.IsNullOrEmpty(filterDto.Name))
             {
@@ -43,15 +41,37 @@ namespace SimpleMarket.Api.Repositories
             {
                 query = query.Where(p => p.Id >= filterDto.MinId.Value);
             }
-            if(filterDto.CategoryId.HasValue)
+            if (filterDto.CategoryId.HasValue)
             {
-
-
                 query = query.Where(p => p.CategoryId == filterDto.CategoryId);
-                            
             }
+            // Pagenations-> 
+            var item = await query.Skip((filterDto.PageNumber - 1) * filterDto.PageSize)
+                .Take(filterDto.PageSize)
+                .Select(p => new ReadProductDto
+                {
+                    Id = p.Id,
+                    Name = p.Name,
+                    Description = p.Description,
+                    Price = p.Price,
+                    CategoryId = p.CategoryId
 
-            return await query.ToListAsync() ;
+                }).ToListAsync();
+
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / filterDto.PageSize);
+
+            var result = new PaginatedResult<ReadProductDto>
+            {
+                PageNumber = filterDto.PageNumber,
+                PageSize = filterDto.PageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                Result = item
+
+            };
+
+            return result;
         }
 
         public async Task<Product> GetProductByIdAsync(int id)

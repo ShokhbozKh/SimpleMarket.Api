@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SimpleMarket.Api.Data;
+using SimpleMarket.Api.DTOs;
+using SimpleMarket.Api.DTOs.Category;
 using SimpleMarket.Api.Models;
 
 namespace SimpleMarket.Api.Repositories
@@ -15,30 +17,55 @@ namespace SimpleMarket.Api.Repositories
                 throw new ArgumentNullException(nameof(marketDbContext));
         }
 
-        public async Task<IEnumerable<Category>> GetAllCategoriesAsync(string? name, string? desc, int? maxId, int? minId)
+        public async Task<PaginatedResult<ReadCategoryDto>> GetAllCategoriesAsync(CategoryFilterDto categoryFilterDto)
         {
-            var query = _context.Categories.AsQueryable();
+            var query = _context.Categories
+                .SelectMany(p=>p.Products)
+                .AsQueryable();
 
-            if(!string.IsNullOrWhiteSpace(name))
+            if(!string.IsNullOrWhiteSpace(categoryFilterDto.Name))
             {
-                query = query.Where(query => query.Name.Contains(name));
+                query = query.Where(query => query.Name.Contains(categoryFilterDto.Name));
             }
-            if (!string.IsNullOrWhiteSpace(desc))
+            if (!string.IsNullOrWhiteSpace(categoryFilterDto.Description))
             {
-                query = query.Where(query => query.Description.Contains(desc));
+                query = query.Where(query => query.Description.Contains(categoryFilterDto.Description));
             }
             // Filter by maxId and minId if provided
-            if(minId.HasValue) // true if minId is not null
+            if(categoryFilterDto.MinId.HasValue) // true if minId is not null
             {
-                query = query.Where(query => query.Id >= minId.Value);
+                query = query.Where(query => query.Id >= categoryFilterDto.MinId);
             }
-            if(maxId.HasValue) // true if maxId is not null
+            if(categoryFilterDto.MinId.HasValue) // true if maxId is not null
             {
-                query = query.Where(query => query.Id <= maxId.Value);
+                query = query.Where(query => query.Id <= categoryFilterDto.MaxId);
             }
+            // [1,2,3,4,5,6,7,8,9,0]
+            // skip(2) => 7,8,9
+            // take(3)
+            var totalCount = await query.CountAsync();
+            var totalPages = (int)Math.Ceiling((double)totalCount / categoryFilterDto.PageSize);
+
+            query = query.Skip((categoryFilterDto.PageNumber-1)*categoryFilterDto.PageSize)
+                .Take(categoryFilterDto.PageSize);
 
 
-            return await query.ToListAsync();
+            var resultPages = new PaginatedResult<ReadCategoryDto>
+            {
+                PageNumber = categoryFilterDto.PageNumber,
+                PageSize = categoryFilterDto.PageSize,
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                Result = await query.Select(category => new ReadCategoryDto
+                {
+                    Id = category.Id,
+                    Name = category.Name,
+                    Description = category.Description
+                }).ToListAsync()
+
+            }
+            ;
+            return Task.FromResult( resultPages).Result;
         }
         public async Task<Category> GetByIdAsync(int id)
         {

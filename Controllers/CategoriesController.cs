@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SimpleMarket.Api.Data;
+using SimpleMarket.Api.DTOs;
 using SimpleMarket.Api.DTOs.Category;
 using SimpleMarket.Api.Models;
 using SimpleMarket.Api.Services;
@@ -15,25 +16,35 @@ namespace SimpleMarket.Api.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
-        public CategoriesController(ICategoryService category)
+        private readonly ILogger<CategoriesController> _logger;
+        public CategoriesController(ICategoryService category, ILogger<CategoriesController> logger)
         {
             _categoryService = category ?? throw new ArgumentNullException(nameof(category));
+            _logger = logger;
         }
         // GET: api/categories
         [HttpGet]
-        public async Task <ActionResult<IEnumerable<ReadCategoryDto>>> Get(string? searchName, string? description, int? maxId, int? minId)
+        [ResponseCache(Duration = 10)] // cache
+        public async Task <ActionResult<PaginatedResult<ReadCategoryDto>>> Get([FromQuery]CategoryFilterDto categoryFilter)
         {
-            var result = await _categoryService.GetAllCategoriesAsync( searchName, description, maxId, minId);
-            if(result == null || !result.Any())
+            _logger.LogInformation("Categoriyalar olinmoqda .....");
+
+            var result = await _categoryService.GetAllCategoriesAsync(categoryFilter);
+
+            if(result == null)
             {
                 return NotFound("No categories found.");
             }
+            _logger.LogInformation($"{result.TotalCount} ta malumot topildi");
+
+            // Pagination
+           
             return Ok(result);
         }
 
         // GET api/categores/5
         [HttpGet("{id}")]
-        public async Task <ActionResult<ReadCategoryDto>> GetById(int id)
+        public async Task <ActionResult<ReadCategoryDto>> GetById([FromRoute]int id)
         {
             var result = await _categoryService.GetCategoryByIdAsync(id);
             if (result == null)
